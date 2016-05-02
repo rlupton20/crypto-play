@@ -20,6 +20,7 @@ char get_bit(int n, shift_register_t sr);
 void set_bit(int n, shift_register_t *sr);
 
 uint8_t get_block_at(int n, shift_register_t sr);
+void set_block_at(int n, uint8_t byte, shift_register_t *sr);
 
 uint8_t block_shift(shift_register_t *sr);
 

@@ -6,13 +6,16 @@
 #include "shift_register.h"
 #include "test.h"
 
+#include <stdio.h>
+
 #define BLOCKSIZE (8*sizeof(uint8_t)) /* Size of a byte in bits */
+#define numblocks(n) ((n) / BLOCKSIZE + ((n) % BLOCKSIZE ? 1 : 0))
 
 /* new_register(n) creates a new shift register
    containing n bits. n should be a multiple of 8. */
 shift_register_t *new_register(int nbits)
 {
-  assert( nbits % BLOCKSIZE == 0 );
+  assert( nbits > 8);
 
   /* Allocate a new shift_register, and set the number of bits. */
   shift_register_t *newregister;
@@ -22,7 +25,7 @@ shift_register_t *new_register(int nbits)
   newregister->nbits = nbits;
 
   /* Allocate the register bit blocks */
-  int blocks = nbits / BLOCKSIZE;
+  int blocks = numblocks(nbits);
   newregister->reg = (uint8_t *) malloc(blocks);
   /* INSERT SOME ERROR HANDLING HERE */
 }
@@ -86,12 +89,30 @@ uint8_t get_block_at(int n, shift_register_t sr)
   return (higher | lower);
 }
 
+void set_block_at(int n, uint8_t byte, shift_register_t *sr)
+{
+  assert( n + BLOCKSIZE <= sr->nbits);
+
+  char shift = sr->nbits % BLOCKSIZE;
+  int block = n / BLOCKSIZE;
+  
+  uint8_t maskl = 255 >> (BLOCKSIZE - shift);
+  uint8_t maskh = 255 << shift;
+
+  sr->reg[block] = (sr->reg[block] & maskl) | (byte << shift);
+  if(shift)  /* i.e. we need to alter the byte above */
+    sr->reg[block+1] = (sr->reg[block+1] & maskh) |
+      (byte >> (BLOCKSIZE - shift));
+  
+}
+
+
 
 uint8_t block_shift(shift_register_t *sr)
 {
   assert( sr != NULL );
   uint8_t first = sr->reg[0];
-  int blocks = (sr->nbits / BLOCKSIZE);
+  int blocks = numblocks(sr->nbits);
   int i;
 
   for(i = 0; i < blocks - 1; ++i)
@@ -138,6 +159,20 @@ char get_block_at_test()
   return (136 == block);
 }
 
+char set_block_at_test()
+{
+  shift_register_t *reg = new_register(13);
+  uint8_t byte = 225;
+  uint8_t res;
+
+  set_block_at(5, byte, reg);
+  res = get_block_at(5, *reg);
+
+  del_register(reg);
+
+  return (byte == res);
+}
+
 char block_shift_test()
 {
   shift_register_t *reg = new_register(24);
@@ -159,6 +194,7 @@ char block_shift_test()
 
 test tests[] = { {"get_bit test", get_bit_test },
 		 {"get_block_at_test", get_block_at_test},
+		 {"set_block_at test", set_block_at_test},
 		 {"block_shift test", block_shift_test} };
 
 testsuite shift_register_tests = { "shift_register.c tests",
