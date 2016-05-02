@@ -5,13 +5,13 @@
 #include <assert.h>
 #include "shift_register.h"
 
+#define BLOCKSIZE (8*sizeof(uint8_t)) /* Size of a byte in bits */
 
 /* new_register(n) creates a new shift register
-   containing n bits. */
+   containing n bits. n should be a multiple of 8. */
 shift_register_t *new_register(int nbits)
 {
-  /* First take a measure of the number of bits in a block. */
-  int bs = sizeof(block_t);
+  assert( nbits % BLOCKSIZE == 0 );
 
   /* Allocate a new shift_register, and set the number of bits. */
   shift_register_t *newregister;
@@ -21,8 +21,8 @@ shift_register_t *new_register(int nbits)
   newregister->nbits = nbits;
 
   /* Allocate the register bit blocks */
-  int blocks = (nbits / bs) + (nbits % bs ? 1 : 0);
-  newregister->reg = (block_t *) malloc(blocks * bs);
+  int blocks = nbits / BLOCKSIZE;
+  newregister->reg = (uint8_t *) malloc(blocks);
   /* INSERT SOME ERROR HANDLING HERE */
 }
 
@@ -43,8 +43,8 @@ char get_bit(int n, shift_register_t sr)
 {
   assert(n < sr.nbits);
 
-  int block = n / (8*sizeof(block_t));
-  char bit = n % (8*sizeof(block_t));
+  int block = n / BLOCKSIZE;
+  char bit = n % BLOCKSIZE;
 
   return (sr.reg[block] & (1 << bit));
 }
@@ -54,30 +54,50 @@ char get_bit(int n, shift_register_t sr)
 
 void set_bit(int n, shift_register_t *sr)
 {
+  assert( sr != NULL );
   assert(n < sr->nbits);
   
-  int block = n / (8*sizeof(block_t));
-  char bit = n % (8*sizeof(block_t));
+  int block = n / BLOCKSIZE;
+  char bit = n % BLOCKSIZE;  
 
   (sr->reg)[block] = (sr->reg)[block] | (1 << bit);
 }
 
 
 
-block_t get_block_at(int n, shift_register_t sr)
+uint8_t get_block_at(int n, shift_register_t sr)
 {
-  assert( n + 8*sizeof(block_t) <= sr.nbits );
+  assert( n + BLOCKSIZE <= sr.nbits );
   
-  block_t higher = 0;
-  block_t lower = 0;
-  int block;
-  char shift;
+  uint8_t higher = 0;
+  uint8_t lower = 0;
 
-  block = n / (8*sizeof(block_t));
-  shift = n % (8*sizeof(block_t));
+  unsigned int block = n / BLOCKSIZE;
+  uint8_t shift = n % BLOCKSIZE; 
 
-  lower = lower | (sr.reg[block] >> shift);
-  higher = higher | (sr.reg[block+1] << (8*sizeof(block_t) - shift));
+  lower = (sr.reg[block] >> shift);
+  /* If no bits are required from the block above, set higher
+     to zero. Else get the correct bits. Note this also saves
+     us reading outside the boundaries of the reg array if we 
+     ask for the last block. */
+  higher = shift ? (sr.reg[block+1] << (BLOCKSIZE - shift)) : 0;
 
   return (higher | lower);
+}
+
+
+uint8_t block_shift(shift_register_t *sr)
+{
+  assert( sr != NULL );
+  uint8_t first = sr->reg[0];
+  int blocks = (sr->nbits / BLOCKSIZE);
+  int i;
+
+  for(i = 0; i < blocks - 1; ++i)
+    sr->reg[i] = sr->reg[i+1];
+
+  /* zero the last block */
+  sr->reg[i] = 0;
+  
+  return first;
 }
