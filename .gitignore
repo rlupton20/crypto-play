@@ -1,0 +1,6 @@
+# Text editor stuff
+*~
+*#
+
+# Ignore the main Trivium binary
+Trivium/main
