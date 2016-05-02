@@ -3,6 +3,7 @@
    which are intended for use as a shift register */
 
 #include <stdint.h>
+#include "test.h"
 
 #ifndef _SHIFTREG
 #define _SHIFTREG
@@ -22,4 +23,5 @@ uint8_t get_block_at(int n, shift_register_t sr);
 
 uint8_t block_shift(shift_register_t *sr);
 
+extern testsuite shift_register_tests;
 #endif

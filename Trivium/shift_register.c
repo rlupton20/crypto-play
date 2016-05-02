@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "shift_register.h"
+#include "test.h"
 
 #define BLOCKSIZE (8*sizeof(uint8_t)) /* Size of a byte in bits */
 
@@ -101,3 +102,65 @@ uint8_t block_shift(shift_register_t *sr)
   
   return first;
 }
+
+
+
+/**           TESTS          **/
+
+
+char get_bit_test()
+{
+  shift_register_t *reg;
+  uint8_t isSet, isNSet;
+  
+  reg = new_register(24);
+
+  set_bit(10, reg);
+  isSet = get_bit(10, *reg);
+  isNSet = get_bit(9, *reg) || get_bit(11, *reg);
+
+  del_register(reg);
+  return (isSet && !isNSet);
+}
+
+char get_block_at_test()
+{
+  shift_register_t *reg;
+  uint8_t block;
+  
+  reg = new_register(24);
+  /* Set bits on both sides of the byte boundary */
+  set_bit(13, reg);
+  set_bit(17, reg);
+
+  block = get_block_at(10, *reg);
+  del_register(reg);
+  return (136 == block);
+}
+
+char block_shift_test()
+{
+  shift_register_t *reg = new_register(24);
+  uint8_t first;
+  uint8_t result;
+
+  set_bit(3, reg);
+  set_bit(11, reg);
+  set_bit(18, reg);
+
+  first = block_shift(reg);
+  result = (first == 8 && get_block_at(0,*reg) == 8
+	    && get_block_at(16,*reg) == 0);
+  
+  del_register(reg);
+
+  return result;
+}
+
+test tests[] = { {"get_bit test", get_bit_test },
+		 {"get_block_at_test", get_block_at_test},
+		 {"block_shift test", block_shift_test} };
+
+testsuite shift_register_tests = { "shift_register.c tests",
+				   tests,
+				   sizeof(tests) / sizeof(test) };
