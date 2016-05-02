@@ -175,17 +175,17 @@ char set_block_at_test()
 
 char block_shift_test()
 {
-  shift_register_t *reg = new_register(24);
+  shift_register_t *reg = new_register(29);
   uint8_t first;
   uint8_t result;
 
   set_bit(3, reg);
   set_bit(11, reg);
-  set_bit(18, reg);
+  set_bit(27, reg);
 
   first = block_shift(reg);
   result = (first == 8 && get_block_at(0,*reg) == 8
-	    && get_block_at(16,*reg) == 0);
+	    && get_block_at(21,*reg) == 0);
   
   del_register(reg);
 
