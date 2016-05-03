@@ -19,15 +19,22 @@ shift_register_t *new_register(int nbits)
 
   /* Allocate a new shift_register, and set the number of bits. */
   shift_register_t *newregister;
-  newregister = (shift_register_t *) malloc(sizeof(shift_register_t));
-  /* INSERT SOME ERROR HANDLING HERE */
+  if( (newregister = (shift_register_t *) malloc(sizeof(shift_register_t))) == NULL)
+    return NULL;
+  
 
   newregister->nbits = nbits;
 
   /* Allocate the register bit blocks */
   int blocks = numblocks(nbits);
   newregister->reg = (uint8_t *) malloc(blocks);
-  /* INSERT SOME ERROR HANDLING HERE */
+
+  if (newregister->reg == NULL) { /* i.e. malloc failed */
+    free(newregister);
+    return NULL;
+  }
+  else
+    return newregister;
 }
 
 void del_register(shift_register_t *sr)
