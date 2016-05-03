@@ -15,7 +15,7 @@
    containing n bits. n should be a multiple of 8. */
 shift_register_t *new_register(int nbits)
 {
-  assert( nbits > 8);
+  assert( nbits > 8 );
 
   /* Allocate a new shift_register, and set the number of bits. */
   shift_register_t *newregister;
@@ -199,11 +199,11 @@ char block_shift_test()
   return result;
 }
 
-test tests[] = { {"get_bit test", get_bit_test },
+test _sr_tests[] = { {"get_bit test", get_bit_test },
 		 {"get_block_at_test", get_block_at_test},
 		 {"set_block_at test", set_block_at_test},
 		 {"block_shift test", block_shift_test} };
 
 testsuite shift_register_tests = { "shift_register.c tests",
-				   tests,
-				   sizeof(tests) / sizeof(test) };
+				   _sr_tests,
+				   sizeof(_sr_tests) / sizeof(test) };

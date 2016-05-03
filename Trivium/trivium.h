@@ -14,5 +14,8 @@ typedef struct _trivium_ks {
 } trivium_keystream;
 
 trivium_keystream *new_keystream();
+void del_keystream(trivium_keystream *tks);
+
+extern testsuite trivium_testsuite;
 
 #endif

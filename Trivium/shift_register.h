@@ -13,7 +13,7 @@ typedef struct s_shift_register {
   uint8_t *reg;
 } shift_register_t;
 
-shift_register_t *new_register(int nbytes);
+shift_register_t *new_register(int nbits);
 void del_register(shift_register_t *sr);
 
 char get_bit(int n, shift_register_t sr);

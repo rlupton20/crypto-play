@@ -10,11 +10,14 @@
 int main(int argc, char *argv[])
 {
   int i;
+  trivium_keystream *tks;
+
   
   printf("Trivium test driver.\n");
 
   run_suite(shift_register_tests);
-
+  run_suite(trivium_testsuite);
+  
   return 0;
 }
 
