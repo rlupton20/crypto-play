@@ -23,6 +23,13 @@ uint8_t get_next_key(trivium_keystream *tks);
  * registers. The third shift register is also initialized. */
 void load_key(char *key, char *iv, trivium_keystream *tks);
 
+/* get_primed_trivium_cipher returns a pre-primed cipher object
+ * to use to encrypt data */
+trivium_keystream *get_primed_trivium_cipher(char *key, char *iv);
+
+uint8_t encrypt(uint8_t byte, uint8_t key);
+uint8_t decrypt(uint8_t byte, uint8_t key);
+
 extern testsuite trivium_testsuite;
 
 #endif

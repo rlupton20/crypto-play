@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <assert.h>
+#include <stdio.h>
 
 #include "trivium.h"
 #include "shift_register.h"
@@ -103,9 +104,9 @@ uint8_t get_next_key(trivium_keystream *tks)
 
   /* Feed the output of each shift register into the next, *
    * after XORing it with the feedback byte.               */
-  set_block_at(77, A_out^feedback_B, tks->srB);
-  set_block_at(104, B_out^feedback_C, tks->srC);
-  set_block_at(86, C_out^feedback_A, tks->srA);
+  set_block_at(76, A_out^feedback_B, tks->srB);
+  set_block_at(103, B_out^feedback_C, tks->srC);
+  set_block_at(85, C_out^feedback_A, tks->srA);
   
   return (A_out ^ B_out ^ C_out);
 }
@@ -128,8 +129,8 @@ void load_key(char *key, char *iv, trivium_keystream *tks)
   for (i = 0; i < KEY_BYTES; ++i, --iv, --key) {
     block_shift(tks->srA);
     block_shift(tks->srB);
-    set_block_at(86, reverse_byte(*iv), tks->srA);
-    set_block_at(77, reverse_byte(*key), tks->srB);
+    set_block_at(85, reverse_byte(*iv), tks->srA);
+    set_block_at(76, reverse_byte(*key), tks->srB);
   }
 
   /* Set shift register C's bytes appropriately */
@@ -145,6 +146,35 @@ uint8_t reverse_byte(uint8_t b)
   b = (b & 0x0F) << 4 | (b & 0xF0) >> 4;
   b = (b & 0x33) << 2 | (b & 0xCC) >> 2;
   b = (b & 0x55) << 1 | (b & 0xAA) >> 1;
+}
+
+
+trivium_keystream *get_primed_trivium_cipher(char *key, char *iv)
+{
+  trivium_keystream *tks;
+  int i;
+  
+  if ( (tks = new_keystream()) == NULL)
+    return NULL;
+
+  load_key(key, iv, tks);
+
+  /* Now prime the system */
+  for(i = 0; i<1152 ; ++i)
+    get_next_key(tks);
+
+  return tks;
+}
+
+ uint8_t encrypt(uint8_t byte, uint8_t key)
+{
+  return (byte ^ key);
+}
+
+uint8_t decrypt(uint8_t byte, uint8_t key)
+{
+  /* encryption is self-inverse */
+  return encrypt(byte, key);
 }
 
 /**        TESTS        **/
@@ -163,9 +193,41 @@ char check_reverse_byte()
   return (reverse_byte(test) == 0b11101011);
 }
 
+char encrypt_decrypt()
+{
+  uint8_t byte, key;
+  byte = 't';
+  key = 'k';
+  return ('t' == decrypt(encrypt(byte, key),key));
+}
+
+/* This is mostly to check the cipher runs */
+char trivium_encrypt_string()
+{
+  char *string = "Test string";
+  char *key = "keystring1";
+  char *iv = "initialvec";
+  uint8_t ks;
+
+  trivium_keystream *enc;
+  
+  enc = get_primed_trivium_cipher(key, iv);
+
+  do {
+    ks = get_next_key(enc);
+    printf("%x ", encrypt(*string++, ks));
+  } while (*string != '\0');
+  putchar('\n');
+
+  del_keystream(enc);
+  return 1;
+}
+
 test _trivium_tests[] = {
     {"Allocate and delete a Trivium keystream", allocate_and_delete },
-    {"Check reverse_byte reverses bytes", check_reverse_byte } };
+    {"Check reverse_byte reverses bytes", check_reverse_byte },
+    {"Check decrypt is inverse to encrypt", encrypt_decrypt},
+    {"Encrypt \"Test String\"", trivium_encrypt_string} };
 
 testsuite trivium_testsuite = { "trivium.c tests",
 				_trivium_tests,
