@@ -10,7 +10,7 @@
 trivium_keystream *new_keystream()
 {
   trivium_keystream *ks;
-  if ( (ks = (trivium_keystream *) malloc(sizeof(trivium_keystream))) == NULL)
+  if ( (ks = (trivium_keystream *) calloc(1, sizeof(trivium_keystream))) == NULL)
     return NULL;
 
   /* A:93,B:84,C:111 */
