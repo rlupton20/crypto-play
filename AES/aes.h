@@ -4,6 +4,6 @@
 
 #import <stdint.h>
 
-typedef uint8_t AES_BLOCK[16];
+typedef uint8_t AES_BLOCK_t[16];
 
 #endif
