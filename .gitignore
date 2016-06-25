@@ -4,3 +4,6 @@
 
 # Ignore the main Trivium binary
 Trivium/main
+
+# Ignore the main AES binary
+AES/main
