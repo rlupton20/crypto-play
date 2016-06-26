@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include "sbox.h"
+#include "test.h"
 
 int main(int argc, char *argv[])
 {
-  printf("S(0xc2) = %x\n", s_box(0xc2)); 
+  run_suite(sbox_tests);
   return 0;
 }

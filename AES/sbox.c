@@ -2,6 +2,10 @@
 
 #include <stdint.h>
 #include "sbox.h"
+#include "test.h"
+
+/* Test declarations */
+char sbox_inverts_sbox_inverse();
 
 /* S_Box is a lookup table for the substitution box *
  * phase of a single round of AES encryption.       */
@@ -296,7 +300,7 @@ uint8_t _s_box_inverse [] = { 0x52,
 			      0xfb,
 
 			      0x7c,
-			      0xe3.
+			      0xe3,
 			      0x39,
 			      0x82,
 			      0x9b,
@@ -563,3 +567,20 @@ uint8_t s_box_inverse(uint8_t byte)
 {
   return _s_box_inverse[byte];
 }
+
+char sbox_inverts_sbox_inverse()
+{
+  int i;
+  char result = 1;
+
+  for( i=0; i<256; ++i ) 
+    result = result && (s_box(s_box_inverse(i)) == i);
+
+  return result;
+}
+
+test tests[] = {
+  { "Check that s_box is left inverse to s_box_inverse",
+    sbox_inverts_sbox_inverse } };
+
+ testsuite sbox_tests = { "S-Box tests", tests, sizeof(tests) / sizeof(test) };
