@@ -558,3 +558,8 @@ uint8_t s_box(uint8_t byte)
 {
   return _s_box[byte];
 }
+
+uint8_t s_box_inverse(uint8_t byte)
+{
+  return _s_box_inverse[byte];
+}

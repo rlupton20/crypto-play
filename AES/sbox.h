@@ -7,5 +7,6 @@
 #include <stdint.h>
 
 uint8_t s_box(uint8_t byte);
+uint8_t s_box_inverse(uint8_t byte);
 
 #endif
