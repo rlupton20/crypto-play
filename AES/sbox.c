@@ -5,6 +5,7 @@
 #include "test.h"
 
 /* Test declarations */
+char sbox_inverse_inverts_sbox();
 char sbox_inverts_sbox_inverse();
 
 /* S_Box is a lookup table for the substitution box *
@@ -568,6 +569,9 @@ uint8_t s_box_inverse(uint8_t byte)
   return _s_box_inverse[byte];
 }
 
+
+/* TESTS */
+
 char sbox_inverts_sbox_inverse()
 {
   int i;
@@ -579,8 +583,22 @@ char sbox_inverts_sbox_inverse()
   return result;
 }
 
+char sbox_inverse_inverts_sbox()
+{
+  int i;
+  char result = 1;
+
+  for( i=0; i<256; ++i )
+    result = result && (s_box_inverse(s_box(i)) == i);
+
+  return result;
+}
+
+
 test tests[] = {
   { "Check that s_box is left inverse to s_box_inverse",
-    sbox_inverts_sbox_inverse } };
+    sbox_inverts_sbox_inverse },
+  { "Check that s_box is right inverse to s_box_inverse",
+    sbox_inverse_inverts_sbox } };
 
  testsuite sbox_tests = { "S-Box tests", tests, sizeof(tests) / sizeof(test) };
